@@ -19,7 +19,7 @@ class ControlPoint {
   
   Window myWindow; // viewing window
   color c; // for displaying
-  float thick;
+  float thick; // for collisions model
   
   //================= Constructor ====================//
   ControlPoint(PVector position_, float m,  float thk, Window myWindow_) {
