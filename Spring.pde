@@ -50,10 +50,10 @@ class Spring {
   // For display purposes
   Window myWindow;
   float thick; // default thickness = 1
-  color c;
+  color c; // default random coloring
   
   //=============== Constructor =================//
-  Spring( ControlPoint a, ControlPoint b, float r, float s, float d, Window w) {
+  Spring( ControlPoint a, ControlPoint b, float r, float s, float d, float th_, Window w) {
     p1 = a;
     p2 = b;
     
@@ -62,11 +62,11 @@ class Spring {
     damping = d;
     
     myWindow = w;
-    thick = myWindow.pdx(1);
+    thick = myWindow.pdx(th_);
     c = color(random(1,255), random(1,255), random(1,255));
-    
   }
-  
+  Spring( ControlPoint a, ControlPoint b, float r, float s, float d, Window w) { 
+    this( a, b, r, s, d, 1, w);}
   
   //=================== Methods ================//
   
