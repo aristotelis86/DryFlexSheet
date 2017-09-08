@@ -79,6 +79,7 @@ class ControlPoint {
   PVector positionOld;
   PVector velocity; // current velocity
   PVector velocityOld;
+  PVector acceleration; // current acceleration
   PVector force; // force acting on the point-mass
   float mass; // mass of the point
   boolean fixed; // fix the particle at its location
@@ -117,7 +118,6 @@ class ControlPoint {
   void display() {
     noStroke();
     fill(c);
-    //ellipse(myWindow.px(position.x), myWindow.py(position.y), myWindow.x.r, myWindow.y.r);
     ellipse(myWindow.px(position.x), myWindow.py(position.y), myWindow.px(thick), myWindow.py(thick));
   }
   
@@ -129,6 +129,12 @@ class ControlPoint {
   // Accumulate all the forces acting on the particle
   void applyForce(PVector FF) {
     force.add(FF);
+  }
+  
+  // Find the acceleration due to forces
+  void calculateAcceleration() {
+    PVector accel = force.copy();
+    acceleration = accel.div(mass);
   }
   
   // Make the particle free of constraints
@@ -167,10 +173,11 @@ class ControlPoint {
     position.add(randVel);
   }
   
+  // 
   void update(float t) {
-    PVector accel = PVector.div(force, mass);
-    
-    velocity.add(PVector.mult(accel,t));
+    //PVector accel = PVector.div(force, mass);
+    calculateAcceleration();
+    velocity.add(PVector.mult(acceleration,t));
     position.add(PVector.mult(velocity,t));
   }
   
