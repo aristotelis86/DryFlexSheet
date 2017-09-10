@@ -1,22 +1,22 @@
 //=========================== Spring Class ========================//
 
 //-------------------- Example Code for Testing -------------------//
-//***************************** INPUTS Section *****************************//
+////***************************** INPUTS Section *****************************//
 
-int nx = (int)pow(2,6); // x-dir resolution
-int ny = (int)pow(2,6); // y-dir resolution
+//int nx = (int)pow(2,6); // x-dir resolution
+//int ny = (int)pow(2,6); // y-dir resolution
 
-int N = 4; // number of control points to create
+//int N = 4; // number of control points to create
 
-float t = 0; // time keeping
-float dt = 0.01; // time step size
+//float t = 0; // time keeping
+//float dt = 0.01; // time step size
 
-float restLength = 4;
-float stiffness = 10;
-float damping = 2;
-float thickness = 1;
+//float restLength = 4;
+//float stiffness = 10;
+//float damping = 2;
+//float thickness = 1;
 
-//============================ END of INPUTS Section ============================//
+////============================ END of INPUTS Section ============================//
 
 //***************************** Setup Section *****************************//
 //Window view; // convert pixels to non-dim frame
