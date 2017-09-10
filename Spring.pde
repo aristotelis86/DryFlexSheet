@@ -1,44 +1,78 @@
 //=========================== Spring Class ========================//
-//**** Extended from original to include dashpot functionality ****//
 
 //-------------------- Example Code for Testing -------------------//
-//Window view; // window in h-units
-//int m = 40; // x-dir
-//int n = 40; // y-dir
+//***************************** INPUTS Section *****************************//
 
-//ControlPoint cpoint1, cpoint2;
-//Spring spring;
+int nx = (int)pow(2,6); // x-dir resolution
+int ny = (int)pow(2,6); // y-dir resolution
 
-//void setup() {
-//  size(500, 500);    
-//  frameRate(10);
-//  view = new Window(m, n);
-  
-//  cpoint1 = new ControlPoint(10., 10., 20, view);
-//  cpoint2 = new ControlPoint(10., 20., 100, view);
-  
-//  spring = new Spring( cpoint1, cpoint2, 15, 50, 15, view);
-//  spring.thick = view.pdx(.5);
-  
-//} // end of setup
+int N = 4; // number of control points to create
 
+float t = 0; // time keeping
+float dt = 0.01; // time step size
 
-//void draw() {
-//  background(3);
-  
-//  spring.display();
-//  cpoint1.display();
-//  cpoint2.display();
-  
-//  spring.applyAllForces();
-  
-//  cpoint1.update(0.1);
-//  cpoint2.update(0.1);
-  
-//  println(cpoint1.distance(cpoint2));
-//  //noLoop();
+float restLength = 4;
+float stiffness = 10;
+float damping = 2;
+float thickness = 1;
+
+//============================ END of INPUTS Section ============================//
+
+//***************************** Setup Section *****************************//
+//Window view; // convert pixels to non-dim frame
+//ControlPoint [] cpoints = new ControlPoint[N]; // create the set of points
+//Spring spring1, spring2;
+//WriteInfo myWriter; // output information
+
+//// provision to change aspect ratio of window only instead of actual dimensions
+//void settings(){
+//    size(600, 600);
 //}
 
+//void setup() {
+//  Window view = new Window( 1, 1, nx, ny, 0, 0, width, height);
+//  for (int i=0; i<N; i++) {
+//    float m = random(1,5); // assign random mass on each control point
+//    float th = m/2; // the size of each point is proportional to its mass
+//    cpoints[i] = new ControlPoint( new PVector(random(nx), random(ny)), m, th, view);
+//  }
+  
+//  spring1 = new Spring( cpoints[0], cpoints[1], restLength, stiffness, damping, thickness, view);
+//  spring2 = new Spring( cpoints[2], cpoints[3], restLength, stiffness, damping, thickness, view);
+  
+//  myWriter = new WriteInfo(cpoints);
+//} // end of setup
+
+////***************************** Draw Section *****************************//
+//void draw() {
+//  background(185);
+//  fill(0); // color of text for timer
+//  textSize(32); // text size of timer
+//  text(t, 10, 30); // position of timer
+  
+//  // Update
+//  for (ControlPoint cp : cpoints) { cp.clearForce(); }
+//  spring1.applyAllForces();
+//  spring2.applyAllForces();
+//  for (ControlPoint cp : cpoints) { cp.update(dt); }
+  
+//  // Display
+//  spring1.display();
+//  spring2.display();
+//  for (ControlPoint cp : cpoints) { cp.display(); }
+  
+//  // Write output
+//  myWriter.InfoCPoints();
+  
+//  t += dt;
+//} // end of draw
+
+//// Gracefully terminate writing...
+//void keyPressed() {  
+//  myWriter.closeInfos();
+//  exit(); // Stops the program 
+//}
+// ---------------------------------------------------------------- //
 
 class Spring {
   //========== Attributes - Physical ============//
@@ -53,7 +87,7 @@ class Spring {
   color c; // default random coloring
   
   //=============== Constructor =================//
-  Spring( ControlPoint a, ControlPoint b, float r, float s, float d, float th_, Window w) {
+  Spring( ControlPoint a, ControlPoint b, float r, float s, float d, float th_, Window w ) {
     p1 = a;
     p2 = b;
     
