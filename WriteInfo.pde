@@ -26,9 +26,9 @@ class WriteInfo {
   WriteInfo(ControlPoint [] cp) {
     Ncp = cp.length;
     for (int i=0; i<Ncp; i++) { myCPoints.add(cp[i]); }
-    InitPositionOut(); posFlag = true;
-    InitVelocityOut(); velFlag = true;
-    InitForceOut(); forFlag = true;
+    InitPositionOut(); posFlag = true; InitPoints(outputPos);
+    InitVelocityOut(); velFlag = true; InitPoints(outputVel);
+    InitForceOut(); forFlag = true; InitPoints(outputForce);
   }
   
   WriteInfo(Spring sg) {
@@ -85,6 +85,10 @@ class WriteInfo {
     outputVel.println("Length: "+fs.Length+" Mass: "+fs.Mass+" Points: "+fs.numOfpoints+" Stiffness: "+fs.stiffness+" Damping: "+fs.damping+" dt: "+fs.dtmax);
     outputForce.println("Length: "+fs.Length+" Mass: "+fs.Mass+" Points: "+fs.numOfpoints+" Stiffness: "+fs.stiffness+" Damping: "+fs.damping+" dt: "+fs.dtmax);
     outputEnergy.println("Length: "+fs.Length+" Mass: "+fs.Mass+" Points: "+fs.numOfpoints+" Stiffness: "+fs.stiffness+" Damping: "+fs.damping+" dt: "+fs.dtmax);
+  }
+  
+  void InitPoints( PrintWriter out ) {
+    out.println("Points: "+Ncp);
   }
   
   
