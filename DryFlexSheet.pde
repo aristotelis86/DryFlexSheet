@@ -1,20 +1,30 @@
 //***************************** INPUTS Section *****************************//
 
-int nx = (int)pow(2,6); // x-dir resolution
-int ny = (int)pow(2,6); // y-dir resolution
+int nx = (int)pow(2,7); // x-dir resolution
+int ny = (int)pow(2,7); // y-dir resolution
 
-int N = 20; // number of control points to create
-
-PVector gravity = new PVector(0,1);
 
 float t = 0; // time keeping
-float dt = 0.01; // time step size
+float dt; // time step size
 
+float L = ny/3.;
+float th = 1;
+float M = 2;
+int resol =1;
+float stiffness = 500;
+float xpos = nx/2.;
+float ypos = ny/10.;
+PVector align = new PVector(0, 1);
+PVector gravity = new PVector(0, 10);
+
+float maxVel = 30; // amplitude of init velocity at the bottom
+
+boolean saveVidFlag = true;
 //============================ END of INPUTS Section ============================//
 
 //***************************** Setup Section *****************************//
 Window view; // convert pixels to non-dim frame
-ControlPoint [] cpoints = new ControlPoint[N]; // create the set of points
+FlexibleSheet sheet;
 WriteInfo myWriter; // output information
 
 // provision to change aspect ratio of window only instead of actual dimensions
@@ -22,12 +32,23 @@ void settings(){
     size(600, 600);
 }
 
-
 void setup() {
-  Window view = new Window( 1, 1, nx, ny, 0, 0, width, height);
-  for (int i=0; i<N; i++) cpoints[i] = new ControlPoint( new PVector(random(nx), random(ny)), 1, view);
+  view = new Window( 1, 1, nx, ny, 0, 0, width, height);
+  sheet = new FlexibleSheet( L, th, M, resol, stiffness, xpos, ypos, align, view );
+  sheet.cpoints[0].makeFixed();
+  sheet.Calculate_Stretched_Positions( gravity );
   
-  myWriter = new WriteInfo(cpoints);
+  // Apply the impulse
+  int N = sheet.numOfpoints;
+  
+  // Add an impulse (x-dir) to the particles
+  for (int i = 1; i < N; i++) {
+    sheet.cpoints[i].velocity.x += ((i-1)/(N-2)) * maxVel;
+  }
+  
+  dt = sheet.dtmax;
+  
+  myWriter = new WriteInfo( sheet );
 } // end of setup
 
 //***************************** Draw Section *****************************//
@@ -38,28 +59,26 @@ void draw() {
   text(t, 10, 30); // position of timer
   
   // Update
-  for (ControlPoint cp : cpoints) {
-    cp.clearForce();
-    cp.applyForce(gravity);
-    cp.update(dt);
-  }
+  sheet.update( dt, gravity );
+  sheet.update2( dt, gravity );
   
   // Display
-  for (ControlPoint cp : cpoints) {
-    if (cp.position.y>ny) cp.position.y = ny;
-    cp.display();
-  }
+  sheet.display();
   
   // Write output
-  myWriter.InfoCPoints();
+  myWriter.InfoSheet( t, gravity, ny );
+  if (saveVidFlag) saveFrame("./movie/frame_######.png");
   
+  if (t>60) terminateRun();
   t += dt;
 } // end of draw
 
-
 // Gracefully terminate writing...
-void keyPressed() {
-  
+void keyPressed() {  
+  myWriter.closeInfos();
+  exit(); // Stops the program 
+}
+void terminateRun() {  
   myWriter.closeInfos();
   exit(); // Stops the program 
 }
