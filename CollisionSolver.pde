@@ -132,13 +132,13 @@ class CollisionSolver {
       
       collisionFlag = pbFlag + ppFlag + peFlag;
       
-      if (boolean(collisionFlag)) {
-        // Resolve Collisions
-        ResolveBoundary();
-        ResolvePointPoint();
-        ResolvePointEdge();
-        //collisionFlag = 0;
-      }
+      //if (boolean(collisionFlag)) {
+      //  // Resolve Collisions
+      //  ResolveBoundary();
+      //  ResolvePointPoint();
+      //  ResolvePointEdge();
+      //  //collisionFlag = 0;
+      //}
     }
   } // end of SolveCollisions method
   
