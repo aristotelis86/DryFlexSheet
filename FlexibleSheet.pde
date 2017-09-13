@@ -249,8 +249,6 @@ class FlexibleSheet extends LineSegBody {
       println("WARNING dt constrained to maximum permitted:"+dtmax);
       dt = dtmax;
     }
-    
-    int N = numOfpoints;
     getState();
     
     // Apply Forces for this step
@@ -259,30 +257,11 @@ class FlexibleSheet extends LineSegBody {
     ApplyGravity( p );
     
     // calculate acceleration
-    for (int i = 0; i < N; i++) {
-      cpoints[i].calculateAcceleration();
-      accelCurrent[i] = cpoints[i].acceleration.copy();
+    for (ControlPoint cp : cpoints) {
+      if (!cp.fixed) cp.update( dt );
     }
     
-    // Calculate estimation
-    for (int i = 0; i < N; i++) {
-      if (!cpoints[i].fixed) {
-        xPred[i] = xcurrent[i] + dt*vxcurrent[i];
-        yPred[i] = ycurrent[i] + dt*vycurrent[i];
-        vxPred[i] = vxcurrent[i] + dt*accelCurrent[i].x;
-        vyPred[i] = vycurrent[i] + dt*accelCurrent[i].y;
-      }
-      else {
-        xPred[i] = xcurrent[i];
-        yPred[i] = ycurrent[i];
-        vxPred[i] = vxcurrent[i];
-        vyPred[i] = vycurrent[i];
-      }
-    }
-    // Update the state of the filament for the correction
-    UpdateState(xPred, yPred, vxPred, vyPred);
   } // end of update (prediction)
-  
   
   void update2(float dt, PVector p) {
     
@@ -291,36 +270,16 @@ class FlexibleSheet extends LineSegBody {
       dt = dtmax;
     }
     
-    int N = numOfpoints;
-    
     // Apply Forces for the correction
     ClearForces();
     ApplyIntForces();
     ApplyGravity( p );
     
     // calculate acceleration for the correction
-    for (int i = 0; i < N; i++) {
-      cpoints[i].calculateAcceleration();
-      accelPred[i] = cpoints[i].acceleration.copy();
+    for (ControlPoint cp : cpoints) {
+      if (!cp.fixed) cp.update( dt );
     }
     
-    // Calculate at the new state
-    for (int i = 0; i < N; i++) {
-      if (!cpoints[i].fixed) {
-        xnew[i] = xcurrent[i] + 0.5*dt*(vxcurrent[i]+vxPred[i]);
-        ynew[i] = ycurrent[i] + 0.5*dt*(vycurrent[i]+vyPred[i]);
-        vxnew[i] = vxcurrent[i] + 0.5*dt*(accelCurrent[i].x+accelPred[i].x);
-        vynew[i] = vycurrent[i] + 0.5*dt*(accelCurrent[i].y+accelPred[i].y);
-      }
-      else {
-        xnew[i] = xcurrent[i];
-        ynew[i] = ycurrent[i];
-        vxnew[i] = vxcurrent[i];
-        vynew[i] = vycurrent[i];
-      }
-    }
-    // Update the state of the filament for the correction
-    UpdateState(xnew, ynew, vxnew, vynew);
   } // end of Trapezoid
   
   // -------- Advanced Updates ---------- //
@@ -404,6 +363,18 @@ class FlexibleSheet extends LineSegBody {
     // Update the state of the filament for the correction
     UpdateState(xnew, ynew, vxnew, vynew);
   } // end of Trapezoid
+  
+  // ------------ New Method ------------------- //
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
