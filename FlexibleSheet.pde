@@ -163,7 +163,7 @@ class FlexibleSheet extends LineSegBody {
   }
   
   // Determine relative positions based on the stiffness
-  void Calculate_Stretched_Positions(PVector F) {
+  void Calculate_Stretched_Positions( PVector F ) {
     
     float g = F.mag();
     float ll;
@@ -180,6 +180,48 @@ class FlexibleSheet extends LineSegBody {
       cpoints[i+1].UpdatePosition(newll.x, newll.y);
     }
   } // end of calculate_positions
+  
+  // Give parabolic shape under gravity
+  void Calculate_parabola( PVector F ) {
+    float x1, x2, x3, y1, ymax;
+    float D, Da, Db, Dc;
+    float g = F.mag();
+    float dl, dlnew;
+    float k = stiffness/(numOfsprings/2);
+    dl = 100;
+    dlnew = (pointMass*g/(2*k)) * (.5*Length + dl)/sqrt(sq(.5*Length+dl) - sq(.5*Length));
+    float tol = .01;
+    int Nmax = 100;
+    int iter = 0;
+    
+    while ((abs(dl-dlnew) > tol) && (iter<Nmax)) {
+        dl = dlnew;
+        dlnew = (pointMass*g/(2*k)) * (.5*Length + dl)/sqrt(sq(.5*Length+dl) - sq(.5*Length));
+        iter++;
+    }
+    
+    x1 = cpoints[0].position.x; y1 = cpoints[0].position.y;
+    x3 = cpoints[numOfpoints-1].position.x;
+    
+    x2 = cpoints[(int)(numOfpoints/2.)].position.x;
+    ymax = y1+sqrt(sq(.5*Length + dlnew) - sq(.5*Length));
+    
+    D = sq(x1) * (x2 - x3) - x1 * (sq(x2) - sq(x3)) + (x3*sq(x2) - x2*sq(x3));
+    Da = y1 * (x2 - x3) - x1 * (ymax - y1) + (ymax*x3 -x2*y1);
+    Db = sq(x1) * (ymax - y1) - y1 * (sq(x2) - sq(x3)) + (y1*sq(x2) - ymax*sq(x3));
+    Dc = sq(x1) * (x2*y1 - ymax*x3) - x1 * (y1*sq(x2) - ymax*sq(x3)) + y1 * (x3*sq(x2) - x2*sq(x3));
+    
+    float a = Da/D;
+    float b = Db/D;
+    float c = Dc/D;
+    
+    for (int i=0; i<numOfpoints; i++) {
+      float xnew = cpoints[i].position.x;
+      float ynew = a*sq(xnew) + b*xnew + c;
+      cpoints[i].UpdatePosition(xnew, ynew);
+    }
+    
+  }
   
   // Update the state of the sheet 
   void UpdateState(float [] Xnew, float [] Ynew, float [] VXnew, float [] VYnew) {
