@@ -80,6 +80,7 @@ class ControlPoint {
   PVector velocity; // current velocity
   PVector velocityOld;
   PVector acceleration; // current acceleration
+  PVector accelerationOld; // current acceleration
   PVector force; // force acting on the point-mass
   float mass; // mass of the point
   boolean fixed; // fix the particle at its location
@@ -174,11 +175,33 @@ class ControlPoint {
   }
   
   // 
-  void update(float t) {
-    //PVector accel = PVector.div(force, mass);
+  void update( float t ) {
     calculateAcceleration();
-    velocity.add(PVector.mult(acceleration,t));
-    position.add(PVector.mult(velocity,t));
+    StoreOld();
+    float x, y, vx, vy;
+    x = position.x + t*velocity.x;
+    y = position.y + t*velocity.y;
+    vx = velocity.x + t*acceleration.x;
+    vy = velocity.y + t*acceleration.y;
+    UpdatePosition( x, y );
+    UpdateVelocity( vx, vy );
+  }
+  
+  void update2( float t ) {
+    calculateAcceleration();
+    float x, y, vx, vy;
+    x = positionOld.x + .5*t*(velocityOld.x + velocity.x);
+    y = positionOld.y + .5*t*(velocityOld.y + velocity.y);
+    vx = velocityOld.x + .5*t*(accelerationOld.x + acceleration.x);
+    vy = velocityOld.y + .5*t*(accelerationOld.y + acceleration.y);
+    UpdatePosition( x, y );
+    UpdateVelocity( vx, vy );
+  }
+  
+  void StoreOld() {
+    positionOld = position.copy();
+    velocityOld = velocity.copy();
+    accelerationOld = acceleration.copy();
   }
   
   void UpdatePosition(float x, float y) {
