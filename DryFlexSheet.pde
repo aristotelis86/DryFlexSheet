@@ -1,31 +1,28 @@
 //***************************** INPUTS Section *****************************//
-
-int nx = (int)pow(2,7); // x-dir resolution
-int ny = (int)pow(2,7); // y-dir resolution
-
+int nx = (int)pow(2,5); // x-dir resolution
+int ny = (int)pow(2,5); // y-dir resolution
 
 float t = 0; // time keeping
 float dt; // time step size
 
-float L = ny/3.;
-float th = 1;
-float M = 2;
+float L1 = 3; //ny/5.;
+float th = 2;
+float M1 = 1;
 int resol =1;
-float stiffness = 500;
-float xpos = nx/2.;
-float ypos = ny/10.;
-PVector align = new PVector(0, 1);
+float stiffness1 = 100;
+float xpos1 = nx/2.;
+float ypos1 = 8*ny/10.;
+PVector align1 = new PVector(0, 1);
 PVector gravity = new PVector(0, 10);
-
-float maxVel = 30; // amplitude of init velocity at the bottom
 
 boolean saveVidFlag = true;
 //============================ END of INPUTS Section ============================//
 
 //***************************** Setup Section *****************************//
 Window view; // convert pixels to non-dim frame
-FlexibleSheet sheet;
+FlexibleSheet sheet1;
 WriteInfo myWriter; // output information
+Collisions collider1;
 
 // provision to change aspect ratio of window only instead of actual dimensions
 void settings(){
@@ -33,22 +30,17 @@ void settings(){
 }
 
 void setup() {
+  frameRate(5);
   view = new Window( 1, 1, nx, ny, 0, 0, width, height);
-  sheet = new FlexibleSheet( L, th, M, resol, stiffness, xpos, ypos, align, view );
-  sheet.cpoints[0].makeFixed();
-  sheet.Calculate_Stretched_Positions( gravity );
   
-  // Apply the impulse
-  int N = sheet.numOfpoints;
+  sheet1 = new FlexibleSheet( L1, th, M1, resol, stiffness1, xpos1, ypos1, align1, view );
   
-  // Add an impulse (x-dir) to the particles
-  for (int i = 1; i < N; i++) {
-    sheet.cpoints[i].velocity.x += ((i-1)/(N-2)) * maxVel;
-  }
+  float dt1 = sheet1.dtmax;
+  dt = dt1;
   
-  dt = sheet.dtmax;
+  collider1 = new Collisions( sheet1, view );
   
-  myWriter = new WriteInfo( sheet );
+  myWriter = new WriteInfo( sheet1 );
 } // end of setup
 
 //***************************** Draw Section *****************************//
@@ -59,11 +51,13 @@ void draw() {
   text(t, 10, 30); // position of timer
   
   // Update
-  sheet.update( dt, gravity );
-  sheet.update2( dt, gravity );
+  sheet1.update( dt, gravity );
+  sheet1.update2( dt, gravity );
+  
+  collider1.SolveCollisions();
   
   // Display
-  sheet.display();
+  sheet1.mydisplay();
   
   // Write output
   myWriter.InfoSheet( t, gravity, ny );
