@@ -122,6 +122,12 @@ class ControlPoint {
     ellipse(myWindow.px(position.x), myWindow.py(position.y), myWindow.px(thick), myWindow.py(thick));
   }
   
+  void impDisplay() {
+    noStroke();
+    fill(255, 0, 0);
+    ellipse(myWindow.px(position.x), myWindow.py(position.y), myWindow.px(thick+.3), myWindow.py(thick+.3));
+  }
+  
   // Clear any forces acting on the particle
   void clearForce() {
     force.mult(0);
