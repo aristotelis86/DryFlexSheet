@@ -183,7 +183,7 @@ class WriteInfo {
     for (int i=0; i<Ncp; i++) {
       ControlPoint cpoi = myCPoints.get(i);
       EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-      EE += cpoi.mass * gMag * cpoi.position.dist(new PVector(0, b));
+      EE += cpoi.mass * gMag * (b - cpoi.position.y);
     }
     outputEnergy.println(EE);
   }
