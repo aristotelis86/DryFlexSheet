@@ -152,6 +152,42 @@ class Collisions {
     return out;
   } // end of Detect Point-Point Collisions
   
+  // Detect Particle-Particle Collisions
+  boolean DetectCPointCPointCollision() {
+    float clearRad;
+    float dtx, dty;
+    int col_count = 0;
+    boolean out = false;
+    
+    for (int i = 0; i < Ncp-1; i++) {
+      ControlPoint pi = LocalPoints[i];
+      
+      for (int j = i+1; j < Ncp; j++) {
+        ControlPoint pj = LocalPoints[j];
+        
+        clearRad = (pi.thick/2 + pj.thick/2)/4;
+        
+        dtx = (pi.position.x+pj.positionOld.x-pi.positionOld.x-pj.position.x)/(pj.positionOld.x-pi.positionOld.x);
+        dty = (pi.position.y+pj.positionOld.y-pi.positionOld.y-pj.position.y)/(pj.positionOld.y-pi.positionOld.y);
+        
+        if ((dtx>0) && (dtx<1)) {
+          if ((dty>0) && (dty<1)) {
+            col_count += 1;
+            PointACol.add(pi);
+            PointBCol.add(pj);
+            pi.impDisplay();
+            pj.impDisplay();
+            noLoop();
+          }
+        }
+      } // end for loop over particles #2
+    } // end for loop over particles #1
+    
+    if (col_count>0) out = true;
+    
+    return out;
+  } // end of Detect Point-Point Collisions
+  
   // Resolve Collisions occuring between points
   void ResolvePointPoint( float dt ) {
     int Npp = PointACol.size();
@@ -164,23 +200,26 @@ class Collisions {
         float piMass = pi.mass;
         float pjMass = pj.mass;
         
-        //float xinew = pi.positionOld.x + dt*(pi.position.x-pi.positionOld.x);
-        //float yinew = pi.positionOld.y + dt*(pi.position.y-pi.positionOld.y);
+        float xinew = pi.positionOld.x + dt*(pi.position.x-pi.positionOld.x);
+        float yinew = pi.positionOld.y + dt*(pi.position.y-pi.positionOld.y);
+        float Vxi = (pi.velocity.x*(piMass-pjMass)/(piMass+pjMass)) + (2*pjMass/(piMass+pjMass))*pj.velocity.x;
+        float Vyi = (pi.velocity.y*(piMass-pjMass)/(piMass+pjMass)) + (2*pjMass/(piMass+pjMass))*pj.velocity.y;
 
-        //float xjnew = pj.positionOld.x + dt*(pj.position.x-pj.positionOld.x);
-        //float yjnew = pj.positionOld.y + dt*(pj.position.y-pj.positionOld.y);
+        float xjnew = pj.positionOld.x + dt*(pj.position.x-pj.positionOld.x);
+        float yjnew = pj.positionOld.y + dt*(pj.position.y-pj.positionOld.y);
+        float Vxj = (pj.velocity.x*(pjMass-piMass)/(piMass+pjMass)) + (2*pjMass/(piMass+pjMass))*pi.velocity.x;
+        float Vyj = (pj.velocity.y*(pjMass-piMass)/(piMass+pjMass)) + (2*pjMass/(piMass+pjMass))*pi.velocity.y;
         
-        float xinew = pi.positionOld.x;
-        float yinew = pi.positionOld.y;
-
-        float xjnew = pj.positionOld.x;
-        float yjnew = pj.positionOld.y;
+        if ((!pi.fixed) && (!pj.fixed)) {
+          pi.UpdatePosition(xinew,yinew); pi.UpdateVelocity(Vxi,Vyi);
+          pj.UpdatePosition(xjnew,yjnew); pj.UpdateVelocity(Vxj,Vyj);
+        }
+        else if (!pi.fixed) { pi.UpdatePosition(xinew,yinew); pi.UpdateVelocity(Vxi,Vyi); }
+        else if (!pj.fixed) { pj.UpdatePosition(xjnew,yjnew); pj.UpdateVelocity(Vxj,Vyj); }
         
-        pi.UpdatePosition(xinew,yinew);
-        pj.UpdatePosition(xjnew,yjnew);
-        pi.impDisplay();
-        pj.impDisplay();
-        noLoop();
+        //pi.impDisplay();
+        //pj.impDisplay();
+        //noLoop();
         
       }
       PointACol = new ArrayList<ControlPoint>();
@@ -195,10 +234,10 @@ class Collisions {
     boolean pointBoundflag, pointPointflag;
     
     pointBoundflag = DetectBoundaryCollision();
-    pointPointflag = DetectPointPointCollision();
+    pointPointflag = DetectCPointCPointCollision();
     
-    if (pointBoundflag) ResolveBoundary( 0.95 );
-    if (pointPointflag) ResolvePointPoint( 0.5 );
+    if (pointBoundflag) ResolveBoundary( 0.08 );
+    if (pointPointflag) ResolvePointPoint( 0.2 );
   }// end of SolveCollisions method
   
 }
