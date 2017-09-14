@@ -277,10 +277,16 @@ class FlexibleSheet extends LineSegBody {
     
     // calculate acceleration for the correction
     for (ControlPoint cp : cpoints) {
-      if (!cp.fixed) cp.update( dt );
+      if (!cp.fixed) cp.update2( dt );
     }
     
   } // end of Trapezoid
+  
+  
+  
+  
+  
+  
   
   // -------- Advanced Updates ---------- //
   // Trapezoid (Predictor-Corrector) Scheme
@@ -761,7 +767,9 @@ class FlexibleSheet extends LineSegBody {
   
   // *************************************************************** //
     
-    
+  void mydisplay() {
+    for (ControlPoint cp : cpoints) cp.display();
+  }
   
   
 } //=========== end of FlexibleSheet class ===============
