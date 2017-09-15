@@ -82,6 +82,7 @@ class ControlPoint {
   PVector acceleration; // current acceleration
   PVector accelerationOld; // current acceleration
   PVector force; // force acting on the point-mass
+  PVector impForce; // impact force tracking
   float mass; // mass of the point
   boolean fixed; // fix the particle at its location
   boolean xfixed; // fix the particle at its y-axis
@@ -134,9 +135,10 @@ class ControlPoint {
   }
   
   // Accumulate all the forces acting on the particle
-  void applyForce(PVector FF) {
-    force.add(FF);
-  }
+  void applyForce(PVector FF) { force.add( FF ); }
+  
+  // Apply impact forces to main force variable
+  void applyImpForce() { force.add( impForce ); }
   
   // Find the acceleration due to forces
   void calculateAcceleration() {
@@ -161,12 +163,8 @@ class ControlPoint {
     yfixed = true;
   }
   
-  // Constrain the particle at its y-axis
   void makeFixedx() { xfixed = true; }
-  
-  // Constrain the particle at its x-axis
   void makeFixedy() { yfixed = true; }
-  
   
   // Get the distance between control points
   float distance(ControlPoint other) {
@@ -180,7 +178,7 @@ class ControlPoint {
     position.add(randVel);
   }
   
-  // 
+  // Update methods based on Predictor-Corrector scheme 
   void update( float t ) {
     calculateAcceleration();
     StoreOld();
@@ -204,6 +202,27 @@ class ControlPoint {
     UpdateVelocity( vx, vy );
   }
   
+  // Alternative update methods based on Predictor-Corrector scheme 
+  void updateAlt( float t ) {
+    calculateAcceleration();
+    StoreOld();
+    float x, y, vx, vy;
+    x = position.x + t*velocity.x + 0.5*acceleration.x*sq(t);
+    y = position.y + t*velocity.y + 0.5*acceleration.y*sq(t);
+    vx = velocity.x + t*acceleration.x;
+    vy = velocity.y + t*acceleration.y;
+    UpdatePosition( x, y );
+    UpdateVelocity( vx, vy );
+  }
+  
+  void updateAlt2( float t ) {
+    calculateAcceleration();
+    float vx, vy;
+    vx = velocityOld.x + .5*t*(accelerationOld.x + acceleration.x);
+    vy = velocityOld.y + .5*t*(accelerationOld.y + acceleration.y);
+    UpdateVelocity( vx, vy );
+  }
+  
   void StoreOld() {
     positionOld = position.copy();
     velocityOld = velocity.copy();
@@ -218,5 +237,71 @@ class ControlPoint {
   void UpdateVelocity(float x, float y) {
     velocity.x = x;
     velocity.y = y;
+  }
+  
+  // Boundary collision detection and resolution
+  void BoundCollision( float r ) {
+    if (position.x < 0) {
+      float x = thick/2;
+      float y = position.y;
+      float vx = -r*velocity.x;
+      float vy = velocity.y;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+    if (position.y < 0) {
+      float x = position.x;
+      float y = thick/2;
+      float vy = -r*velocity.y;
+      float vx = velocity.x;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+    if (position.x > myWindow.x.inE - thick/2) {
+      float x = myWindow.x.inE - thick/2;
+      float y = position.y;
+      float vx = -r*velocity.x;
+      float vy = velocity.y;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+    if (position.y > myWindow.y.inE - thick/2) {
+      float x = position.x;
+      float y = myWindow.y.inE - thick/2;
+      float vy = -r*velocity.y;
+      float vx = velocity.x;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+  }
+  void BoundCollision() { BoundCollision( 1 ); }
+  
+  void CPointCPointCollision( ControlPoint other ) {
+    float dd = distance( other );
+    float clearRad = (this.thick + other.thick)*.25;
+    
+    if ( dd <= clearRad ) {
+      this.impDisplay();
+      other.impDisplay();
+      noLoop();
+    }
+  }
+  void FastCPointCPointCollision( ControlPoint other ) {
+    float dtx, dty;
+    float tol = 1e-7;
+    
+    dtx = (this.position.x+other.positionOld.x-this.positionOld.x-other.position.x)/(other.positionOld.x-this.positionOld.x);
+    dty = (this.position.y+other.positionOld.y-this.positionOld.y-other.position.y)/(other.positionOld.y-this.positionOld.y);
+    
+    if (abs(dtx-dty)<tol) {
+      if ((dtx>0) && (dtx<1)) {
+        println("dtx="+dtx);
+        println("dty="+dty);
+        println("diff="+abs(dtx-dty));
+        this.impDisplay();
+        other.impDisplay();
+        noLoop();
+      }
+    }
   }
 } // end of ControlPoint class
