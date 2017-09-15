@@ -238,4 +238,42 @@ class ControlPoint {
     velocity.x = x;
     velocity.y = y;
   }
+  
+  // Boundary collision detection and resolution
+  void BoundCollision( float r ) {
+    if (position.x < 0) {
+      float x = thick/2;
+      float y = position.y;
+      float vx = -r*velocity.x;
+      float vy = velocity.y;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+    if (position.y < 0) {
+      float x = position.x;
+      float y = thick/2;
+      float vy = -r*velocity.y;
+      float vx = velocity.x;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+    if (position.x > myWindow.x.inE - thick/2) {
+      float x = myWindow.x.inE - thick/2;
+      float y = position.y;
+      float vx = -r*velocity.x;
+      float vy = velocity.y;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+    if (position.y > myWindow.y.inE - thick/2) {
+      float x = position.x;
+      float y = myWindow.y.inE - thick/2;
+      float vy = -r*velocity.y;
+      float vx = velocity.x;
+      UpdatePosition( x, y );
+      UpdateVelocity( vx, vy );
+    }
+  }
+  void BoundCollision() { BoundCollision( 1 ); }
+  
 } // end of ControlPoint class
