@@ -192,52 +192,6 @@ class WriteInfo {
   void saveInfoCPoints( float t ) { saveInfoCPoints( t, 0 ); }
   void saveInfoCPoints() { saveInfoCPoints( 0, 0 ); }
 
-  //void InfoSprings( float t, int d ) {
-  //  float EE;
-
-  //  outputEnergy[d].println("============= t = "+t+" ================");
-  //  for (int i=0; i<mySprings[d].size(); i++) {
-  //    Spring spr = mySprings[d].get(i);
-  //    EE = .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //    outputEnergy[d].println(EE);
-  //  }
-  //}
-  //void InfoSprings( float t ) { 
-  //  InfoSprings(t, 0 );
-  //}
-
-  //void InfoSheet() {
-  //  InfoCPoints();
-  //  float EE = 0;
-
-  //  outputEnergy.println("=============================");
-  //  for (int i=0; i<Nsg; i++) {
-  //    Spring spr = mySprings.get(i);
-  //    EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //  }
-  //  for (int i=0; i<Ncp; i++) {
-  //    ControlPoint cpoi = myCPoints.get(i);
-  //    EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-  //  }
-  //  outputEnergy.println(EE);
-  //}
-
-  //void InfoSheet( float t ) {
-  //  InfoCPoints( t );
-  //  float EE = 0;
-
-  //  outputEnergy.println("============= t = "+t+" ================");
-  //  for (int i=0; i<Nsg; i++) {
-  //    Spring spr = mySprings.get(i);
-  //    EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //  }
-  //  for (int i=0; i<Ncp; i++) {
-  //    ControlPoint cpoi = myCPoints.get(i);
-  //    EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-  //  }
-  //  outputEnergy.println(EE);
-  //}
-
   void saveInfoSheet( float t, PVector g, float b, int d ) {
     float gMag = g.mag();
     saveInfoCPoints( t, d );
@@ -255,6 +209,9 @@ class WriteInfo {
     }
     outputEnergy[d].println(EE);
   }
+  void saveInfoSheet( float t, int d ) { saveInfoSheet( t, new PVector(0,0), 0, d); }
+  void saveInfoSheet( float t ) { saveInfoSheet( t, new PVector(0,0), 0, 0); }
+  void saveInfoSheet() { saveInfoSheet( 0, new PVector(0,0), 0, 0); }
 
   void closeInfos() {
     if (posFlag) terminateFile(outputPos);
@@ -270,10 +227,4 @@ class WriteInfo {
     }
   }
 
-  //void saveInfo( float t ) {
-  //  for (int j=0; j<Nfs; j++) {
-  //    InfoSheet( t, new PVector(0, 0), 0, j );
-  //  }
-  //}
-    
 } // end of class
