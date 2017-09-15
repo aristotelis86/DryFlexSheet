@@ -82,6 +82,7 @@ class ControlPoint {
   PVector acceleration; // current acceleration
   PVector accelerationOld; // current acceleration
   PVector force; // force acting on the point-mass
+  PVector impForce; // impact force tracking
   float mass; // mass of the point
   boolean fixed; // fix the particle at its location
   boolean xfixed; // fix the particle at its y-axis
@@ -134,9 +135,10 @@ class ControlPoint {
   }
   
   // Accumulate all the forces acting on the particle
-  void applyForce(PVector FF) {
-    force.add(FF);
-  }
+  void applyForce(PVector FF) { force.add( FF ); }
+  
+  // Apply impact forces to main force variable
+  void applyImpForce() { force.add( impForce ); }
   
   // Find the acceleration due to forces
   void calculateAcceleration() {
@@ -161,12 +163,8 @@ class ControlPoint {
     yfixed = true;
   }
   
-  // Constrain the particle at its y-axis
   void makeFixedx() { xfixed = true; }
-  
-  // Constrain the particle at its x-axis
   void makeFixedy() { yfixed = true; }
-  
   
   // Get the distance between control points
   float distance(ControlPoint other) {
@@ -180,7 +178,7 @@ class ControlPoint {
     position.add(randVel);
   }
   
-  // 
+  // Update methods based on Predictor-Corrector scheme 
   void update( float t ) {
     calculateAcceleration();
     StoreOld();
@@ -201,6 +199,27 @@ class ControlPoint {
     vx = velocityOld.x + .5*t*(accelerationOld.x + acceleration.x);
     vy = velocityOld.y + .5*t*(accelerationOld.y + acceleration.y);
     UpdatePosition( x, y );
+    UpdateVelocity( vx, vy );
+  }
+  
+  // Alternative update methods based on Predictor-Corrector scheme 
+  void updateAlt( float t ) {
+    calculateAcceleration();
+    StoreOld();
+    float x, y, vx, vy;
+    x = position.x + t*velocity.x + 0.5*acceleration.x*sq(t);
+    y = position.y + t*velocity.y + 0.5*acceleration.y*sq(t);
+    vx = velocity.x + t*acceleration.x;
+    vy = velocity.y + t*acceleration.y;
+    UpdatePosition( x, y );
+    UpdateVelocity( vx, vy );
+  }
+  
+  void updateAlt2( float t ) {
+    calculateAcceleration();
+    float vx, vy;
+    vx = velocityOld.x + .5*t*(accelerationOld.x + acceleration.x);
+    vy = velocityOld.y + .5*t*(accelerationOld.y + acceleration.y);
     UpdateVelocity( vx, vy );
   }
   
