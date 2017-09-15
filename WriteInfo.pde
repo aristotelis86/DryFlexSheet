@@ -48,18 +48,6 @@ class WriteInfo {
     InitEnergyOut(); eneFlag = true; InitPoints(outputEnergy[0]);
   }
 
-  //WriteInfo(Spring sg) {
-  //  Nsg = 1;
-  //  mySprings.add(sg);
-  //  InitEnergyOut(); eneFlag = true;
-  //}
-
-  //WriteInfo(Spring [] sg) {
-  //  Nsg = sg.length;
-  //  for (int i=0; i<Nsg; i++) { mySprings.add(sg[i]); }
-  //  InitEnergyOut();  eneFlag = true;
-  //}
-
   WriteInfo( FlexibleSheet fs ) {
     Nfs = 1;
     Ncp = fs.numOfpoints;
