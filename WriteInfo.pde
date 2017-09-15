@@ -48,22 +48,16 @@ class WriteInfo {
     InitEnergyOut(); eneFlag = true; InitPoints(outputEnergy[0]);
   }
 
-  //WriteInfo(Spring sg) {
-  //  Nsg = 1;
-  //  mySprings.add(sg);
-  //  InitEnergyOut(); eneFlag = true;
-  //}
-
-  //WriteInfo(Spring [] sg) {
-  //  Nsg = sg.length;
-  //  for (int i=0; i<Nsg; i++) { mySprings.add(sg[i]); }
-  //  InitEnergyOut();  eneFlag = true;
-  //}
-
   WriteInfo( FlexibleSheet fs ) {
     Nfs = 1;
     Ncp = fs.numOfpoints;
     Nsg = fs.numOfsprings;
+    
+    outputPos = new PrintWriter[1];
+    outputVel = new PrintWriter[1];
+    outputForce = new PrintWriter[1];
+    outputEnergy = new PrintWriter[1];
+    
     myCPoints =  new ArrayList[1]; 
     mySprings =  new ArrayList[1];
     myCPoints[0] = new ArrayList<ControlPoint>();
@@ -72,18 +66,14 @@ class WriteInfo {
     for (int i=0; i<Ncp; i++) { 
       myCPoints[0].add(fs.cpoints[i]);
     }
-    InitPositionOut(); 
-    posFlag = true;
-    InitVelocityOut(); 
-    velFlag = true;
-    InitForceOut(); 
-    forFlag = true;
-
     for (int i=0; i<Nsg; i++) { 
       mySprings[0].add(fs.springs[i]);
     }
-    InitEnergyOut();  
-    eneFlag = true;
+    
+    InitPositionOut(); posFlag = true;
+    InitVelocityOut(); velFlag = true;
+    InitForceOut(); forFlag = true;
+    InitEnergyOut(); eneFlag = true;
 
     InitSheetOut( fs );
   }
@@ -107,19 +97,15 @@ class WriteInfo {
         myCPoints[j].add(fs[j].cpoints[i]);
       }
 
-      InitPositionOut( j ); 
-      posFlag = true;
-      InitVelocityOut( j ); 
-      velFlag = true;
-      InitForceOut( j ); 
-      forFlag = true;
+      InitPositionOut( j ); posFlag = true;
+      InitVelocityOut( j ); velFlag = true;
+      InitForceOut( j ); forFlag = true;
 
       for (int i=0; i<fs[j].numOfsprings; i++) { 
         mySprings[j].add(fs[j].springs[i]);
       }
 
-      InitEnergyOut( j );  
-      eneFlag = true;
+      InitEnergyOut( j ); eneFlag = true;
     }
     InitSheetOut( fs );
   }
@@ -194,69 +180,26 @@ class WriteInfo {
   void saveInfoCPoints( float t ) { saveInfoCPoints( t, 0 ); }
   void saveInfoCPoints() { saveInfoCPoints( 0, 0 ); }
 
-  //void InfoSprings( float t, int d ) {
-  //  float EE;
+  void saveInfoSheet( float t, PVector g, float b, int d ) {
+    float gMag = g.mag();
+    saveInfoCPoints( t, d );
+    float EE = 0;
 
-  //  outputEnergy[d].println("============= t = "+t+" ================");
-  //  for (int i=0; i<mySprings[d].size(); i++) {
-  //    Spring spr = mySprings[d].get(i);
-  //    EE = .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //    outputEnergy[d].println(EE);
-  //  }
-  //}
-  //void InfoSprings( float t ) { 
-  //  InfoSprings(t, 0 );
-  //}
-
-  //void InfoSheet() {
-  //  InfoCPoints();
-  //  float EE = 0;
-
-  //  outputEnergy.println("=============================");
-  //  for (int i=0; i<Nsg; i++) {
-  //    Spring spr = mySprings.get(i);
-  //    EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //  }
-  //  for (int i=0; i<Ncp; i++) {
-  //    ControlPoint cpoi = myCPoints.get(i);
-  //    EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-  //  }
-  //  outputEnergy.println(EE);
-  //}
-
-  //void InfoSheet( float t ) {
-  //  InfoCPoints( t );
-  //  float EE = 0;
-
-  //  outputEnergy.println("============= t = "+t+" ================");
-  //  for (int i=0; i<Nsg; i++) {
-  //    Spring spr = mySprings.get(i);
-  //    EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //  }
-  //  for (int i=0; i<Ncp; i++) {
-  //    ControlPoint cpoi = myCPoints.get(i);
-  //    EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-  //  }
-  //  outputEnergy.println(EE);
-  //}
-
-  //void InfoSheet( float t, PVector g, float b, int d ) {
-  //  float gMag = g.mag();
-  //  InfoCPoints( t, d );
-  //  float EE = 0;
-
-  //  outputEnergy[d].println("============= t = "+t+" ================");
-  //  for (int i=0; i<mySprings[d].size(); i++) {
-  //    Spring spr = mySprings[d].get(i);
-  //    EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //  }
-  //  for (int i=0; i<myCPoints[d].size(); i++) {
-  //    ControlPoint cpoi = myCPoints[d].get(i);
-  //    EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-  //    EE += cpoi.mass * gMag * (b - cpoi.position.y);
-  //  }
-  //  outputEnergy[d].println(EE);
-  //}
+    outputEnergy[d].println("============= t = "+t+" ================");
+    for (int i=0; i<mySprings[d].size(); i++) {
+      Spring spr = mySprings[d].get(i);
+      EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
+    }
+    for (int i=0; i<myCPoints[d].size(); i++) {
+      ControlPoint cpoi = myCPoints[d].get(i);
+      EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
+      EE += cpoi.mass * gMag * (b - cpoi.position.y);
+    }
+    outputEnergy[d].println(EE);
+  }
+  void saveInfoSheet( float t, int d ) { saveInfoSheet( t, new PVector(0,0), 0, d); }
+  void saveInfoSheet( float t ) { saveInfoSheet( t, new PVector(0,0), 0, 0); }
+  void saveInfoSheet() { saveInfoSheet( 0, new PVector(0,0), 0, 0); }
 
   void closeInfos() {
     if (posFlag) terminateFile(outputPos);
@@ -272,10 +215,4 @@ class WriteInfo {
     }
   }
 
-  //void saveInfo( float t ) {
-  //  for (int j=0; j<Nfs; j++) {
-  //    InfoSheet( t, new PVector(0, 0), 0, j );
-  //  }
-  //}
-    
 } // end of class
