@@ -32,7 +32,7 @@ class FlexibleSheet extends LineSegBody {
     }
     super.end();
     
-    Length = L_;
+    Length = this.coords.get(0).dist(this.coords.get(this.coords.size()-1));
     pointMass = M_;
     stiffness = stiffness_;
     numOfpoints = this.coords.size();
@@ -89,6 +89,14 @@ class FlexibleSheet extends LineSegBody {
   void pointsDisplay() {
     for (ControlPoint cp : cpoints) cp.display();
   }
+  
+  // Calculate current length of sheet
+  float CurrentLength() {
+    float newL = 0;
+    for (int i=0; i<numOfpoints-1; i++) newL += this.coords.get(i).dist(this.coords.get(i+1));
+    return newL;
+  }
+    
   
   // Initialize state arrays for updating
   void InitUpdateVars() {
@@ -278,6 +286,46 @@ class FlexibleSheet extends LineSegBody {
     // calculate acceleration for the correction
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.update2( dt );
+    }
+    
+  } // end of Trapezoid
+  
+  // Alternative Trapezoid (Predictor-Corrector) Scheme
+  void updateAlt(float dt, PVector p) {
+    
+    if (dt>dtmax) {
+      println("WARNING dt constrained to maximum permitted:"+dtmax);
+      dt = dtmax;
+    }
+    getState();
+    
+    // Apply Forces for this step
+    ClearForces();
+    ApplyIntForces();
+    ApplyGravity( p );
+    
+    // calculate acceleration
+    for (ControlPoint cp : cpoints) {
+      if (!cp.fixed) cp.updateAlt( dt );
+    }
+    
+  } // end of update (prediction)
+  
+  void updateAlt2(float dt, PVector p) {
+    
+    if (dt>dtmax) {
+      println("WARNING dt constrained to maximum permitted:"+dtmax);
+      dt = dtmax;
+    }
+    
+    // Apply Forces for the correction
+    ClearForces();
+    ApplyIntForces();
+    ApplyGravity( p );
+    
+    // calculate acceleration for the correction
+    for (ControlPoint cp : cpoints) {
+      if (!cp.fixed) cp.updateAlt2( dt );
     }
     
   } // end of Trapezoid

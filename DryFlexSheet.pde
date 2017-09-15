@@ -2,19 +2,27 @@
 int nx = (int)pow(2,6); // x-dir resolution
 int ny = (int)pow(2,6); // y-dir resolution
 
-int N = 15; // number of control points to create
+float L = ny/4.;
+float thick = 1;
+float M = 2;
+int resol = 1;
+float stiffness = 100;
+float xpos = nx/2.;
+float ypos = ny/4.;
+
+PVector align = new PVector(0,1);
 
 PVector gravity = new PVector(0,10);
 
 float t = 0; // time keeping
-float dt = 0.01; // time step size
+float dt; // time step size
 
 boolean saveVidFlag = false;
 //============================ END of INPUTS Section ============================//
 
 //***************************** Setup Section *****************************//
 Window view; // convert pixels to non-dim frame
-ControlPoint [] cpoints = new ControlPoint[N]; // create the set of points
+FlexibleSheet sheet;
 WriteInfo myWriter; // output information
 
 // provision to change aspect ratio of window only instead of actual dimensions
@@ -24,13 +32,14 @@ void settings(){
 
 void setup() {
   Window view = new Window( 1, 1, nx, ny, 0, 0, width, height);
-  for (int i=0; i<N; i++) {
-    float m = random(1,5); // assign random mass on each control point
-    float th = m/2; // the size of each point is proportional to its mass
-    cpoints[i] = new ControlPoint( new PVector(random(nx), random(ny)), m, th, view);
-  }
   
-  myWriter = new WriteInfo( cpoints );
+  sheet = new FlexibleSheet( L, thick, M, resol, stiffness, xpos, ypos, align, view );
+  sheet.cpoints[0].makeFixed();
+  sheet.Calculate_Stretched_Positions( gravity );
+  
+  dt = sheet.dtmax;
+  
+  myWriter = new WriteInfo( sheet );
 } // end of setup
 
 //***************************** Draw Section *****************************//
@@ -41,27 +50,17 @@ void draw() {
   text(t, 10, 30); // position of timer
   
   // Update
-  for (ControlPoint cp : cpoints) {
-    cp.clearForce();
-    cp.applyForce(gravity);
-    cp.update(dt);
-  }
+  sheet.update( dt, gravity );
+  sheet.update2( dt, gravity );
   
   // Collision
-  for (ControlPoint cp : cpoints) cp.BoundCollision( 0.95 );
-  for (int i=0; i<N-1; i++) {
-    ControlPoint pi = cpoints[i];
-    for (int j=i+1; j<N; j++) {
-      ControlPoint pj = cpoints[j];
-      pi.CPointCPointCollision( pj );
-    }
-  }
+  
   
   // Display
-  for (ControlPoint cp : cpoints) cp.display();
+  sheet.display();
   
   // Write output
-  myWriter.saveInfoCPoints( t );
+  myWriter.saveInfoSheet( t, gravity, ny, 0 );
   if (saveVidFlag) saveFrame("./movie/frame_######.png");
   
   t += dt;

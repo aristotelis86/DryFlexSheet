@@ -64,6 +64,12 @@ class WriteInfo {
     Nfs = 1;
     Ncp = fs.numOfpoints;
     Nsg = fs.numOfsprings;
+    
+    outputPos = new PrintWriter[1];
+    outputVel = new PrintWriter[1];
+    outputForce = new PrintWriter[1];
+    outputEnergy = new PrintWriter[1];
+    
     myCPoints =  new ArrayList[1]; 
     mySprings =  new ArrayList[1];
     myCPoints[0] = new ArrayList<ControlPoint>();
@@ -72,18 +78,14 @@ class WriteInfo {
     for (int i=0; i<Ncp; i++) { 
       myCPoints[0].add(fs.cpoints[i]);
     }
-    InitPositionOut(); 
-    posFlag = true;
-    InitVelocityOut(); 
-    velFlag = true;
-    InitForceOut(); 
-    forFlag = true;
-
     for (int i=0; i<Nsg; i++) { 
       mySprings[0].add(fs.springs[i]);
     }
-    InitEnergyOut();  
-    eneFlag = true;
+    
+    InitPositionOut(); posFlag = true;
+    InitVelocityOut(); velFlag = true;
+    InitForceOut(); forFlag = true;
+    InitEnergyOut(); eneFlag = true;
 
     InitSheetOut( fs );
   }
@@ -107,19 +109,15 @@ class WriteInfo {
         myCPoints[j].add(fs[j].cpoints[i]);
       }
 
-      InitPositionOut( j ); 
-      posFlag = true;
-      InitVelocityOut( j ); 
-      velFlag = true;
-      InitForceOut( j ); 
-      forFlag = true;
+      InitPositionOut( j ); posFlag = true;
+      InitVelocityOut( j ); velFlag = true;
+      InitForceOut( j ); forFlag = true;
 
       for (int i=0; i<fs[j].numOfsprings; i++) { 
         mySprings[j].add(fs[j].springs[i]);
       }
 
-      InitEnergyOut( j );  
-      eneFlag = true;
+      InitEnergyOut( j ); eneFlag = true;
     }
     InitSheetOut( fs );
   }
@@ -240,23 +238,23 @@ class WriteInfo {
   //  outputEnergy.println(EE);
   //}
 
-  //void InfoSheet( float t, PVector g, float b, int d ) {
-  //  float gMag = g.mag();
-  //  InfoCPoints( t, d );
-  //  float EE = 0;
+  void saveInfoSheet( float t, PVector g, float b, int d ) {
+    float gMag = g.mag();
+    saveInfoCPoints( t, d );
+    float EE = 0;
 
-  //  outputEnergy[d].println("============= t = "+t+" ================");
-  //  for (int i=0; i<mySprings[d].size(); i++) {
-  //    Spring spr = mySprings[d].get(i);
-  //    EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
-  //  }
-  //  for (int i=0; i<myCPoints[d].size(); i++) {
-  //    ControlPoint cpoi = myCPoints[d].get(i);
-  //    EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
-  //    EE += cpoi.mass * gMag * (b - cpoi.position.y);
-  //  }
-  //  outputEnergy[d].println(EE);
-  //}
+    outputEnergy[d].println("============= t = "+t+" ================");
+    for (int i=0; i<mySprings[d].size(); i++) {
+      Spring spr = mySprings[d].get(i);
+      EE += .5 * spr.stiffness * spr.getStretch() * spr.getStretch();
+    }
+    for (int i=0; i<myCPoints[d].size(); i++) {
+      ControlPoint cpoi = myCPoints[d].get(i);
+      EE += .5 * cpoi.mass * cpoi.velocity.mag() * cpoi.velocity.mag();
+      EE += cpoi.mass * gMag * (b - cpoi.position.y);
+    }
+    outputEnergy[d].println(EE);
+  }
 
   void closeInfos() {
     if (posFlag) terminateFile(outputPos);
