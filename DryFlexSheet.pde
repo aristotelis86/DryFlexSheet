@@ -63,7 +63,7 @@ void draw() {
   sheet1.mydisplay();
   
   // Write output
-  myWriter.InfoSheet( t, gravity, ny );
+  //myWriter.InfoSheet( t, gravity, ny );
   if (saveVidFlag) saveFrame("./movie/frame_######.png");
   
   if (t>60) terminateRun();
