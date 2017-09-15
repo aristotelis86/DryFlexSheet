@@ -276,4 +276,32 @@ class ControlPoint {
   }
   void BoundCollision() { BoundCollision( 1 ); }
   
+  void CPointCPointCollision( ControlPoint other ) {
+    float dd = distance( other );
+    float clearRad = (this.thick + other.thick)*.25;
+    
+    if ( dd <= clearRad ) {
+      this.impDisplay();
+      other.impDisplay();
+      noLoop();
+    }
+  }
+  void FastCPointCPointCollision( ControlPoint other ) {
+    float dtx, dty;
+    float tol = 1e-7;
+    
+    dtx = (this.position.x+other.positionOld.x-this.positionOld.x-other.position.x)/(other.positionOld.x-this.positionOld.x);
+    dty = (this.position.y+other.positionOld.y-this.positionOld.y-other.position.y)/(other.positionOld.y-this.positionOld.y);
+    
+    if (abs(dtx-dty)<tol) {
+      if ((dtx>0) && (dtx<1)) {
+        println("dtx="+dtx);
+        println("dty="+dty);
+        println("diff="+abs(dtx-dty));
+        this.impDisplay();
+        other.impDisplay();
+        noLoop();
+      }
+    }
+  }
 } // end of ControlPoint class

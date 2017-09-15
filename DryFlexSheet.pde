@@ -2,14 +2,14 @@
 int nx = (int)pow(2,6); // x-dir resolution
 int ny = (int)pow(2,6); // y-dir resolution
 
-int N = 20; // number of control points to create
+int N = 15; // number of control points to create
 
 PVector gravity = new PVector(0,10);
 
 float t = 0; // time keeping
 float dt = 0.01; // time step size
 
-boolean saveVidFlag = true;
+boolean saveVidFlag = false;
 //============================ END of INPUTS Section ============================//
 
 //***************************** Setup Section *****************************//
@@ -30,7 +30,7 @@ void setup() {
     cpoints[i] = new ControlPoint( new PVector(random(nx), random(ny)), m, th, view);
   }
   
-  //myWriter = new WriteInfo(cpoints);
+  myWriter = new WriteInfo( cpoints );
 } // end of setup
 
 //***************************** Draw Section *****************************//
@@ -48,13 +48,20 @@ void draw() {
   }
   
   // Collision
-  for (ControlPoint cp : cpoints) cp.BoundCollision( 0.05 );
+  for (ControlPoint cp : cpoints) cp.BoundCollision( 0.95 );
+  for (int i=0; i<N-1; i++) {
+    ControlPoint pi = cpoints[i];
+    for (int j=i+1; j<N; j++) {
+      ControlPoint pj = cpoints[j];
+      pi.CPointCPointCollision( pj );
+    }
+  }
   
   // Display
   for (ControlPoint cp : cpoints) cp.display();
   
   // Write output
-  //myWriter.InfoCPoints();
+  myWriter.saveInfoCPoints( t );
   if (saveVidFlag) saveFrame("./movie/frame_######.png");
   
   t += dt;
@@ -63,6 +70,6 @@ void draw() {
 
 // Gracefully terminate writing...
 void keyPressed() {
-  //myWriter.closeInfos();
+  myWriter.closeInfos();
   exit(); // Stops the program 
 }
