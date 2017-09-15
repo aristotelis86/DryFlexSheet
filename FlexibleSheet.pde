@@ -250,6 +250,50 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint p : cpoints) p.clearForce();
   }
   
+  // calculate the pressure force at each point
+  PVector [] pressForcePoints ( Field p ) {
+    
+    int orthSize = orth.length;
+    PVector [] pf = new PVector[numOfpoints];
+    for (int i=0; i<numOfpoints; i++) pf[i] = new PVector(0, 0);
+    
+    for ( int s=-1; s<=1; s+=2 ) {
+      
+      for ( int j=0; j<orthSize; j++ ) {
+        float pdl = p.linear( cpoints[j].position.x+0.5*s*thk*orth[j].nx, cpoints[j].position.y+0.5*s*thk*orth[j].ny )*orth[j].l;
+        PVector pTemp = new PVector(s*pdl*orth[j].nx, s*pdl*orth[j].ny);
+        pf[j].sub(pTemp);
+        pf[j+1].sub(pTemp);
+      }
+    }
+    for (int j=1; j<numOfpoints-1; j++) pf[j].div(2);
+    
+    return pf;
+  }
+  
+  // calculate the pressure force at each point
+  PVector [] stressForcePoints ( VectorField Vel, float nu ) {
+    
+    Field omega = Vel.curl();
+    
+    int orthSize = orth.length;
+    PVector [] ps = new PVector[numOfpoints];
+    for (int i=0; i<numOfpoints; i++) ps[i] = new PVector(0, 0);
+    
+    for ( int s=-1; s<=1; s+=2 ) {
+      for ( int j=0; j<orthSize; j++ ) {
+        float omegaZVal = omega.linear( cpoints[j].position.x+0.5*s*thk*orth[j].nx, cpoints[j].position.y+0.5*s*thk*orth[j].ny );
+        PVector pTemp = new PVector(s*omegaZVal*orth[j].ny, s*omegaZVal*orth[j].nx);
+        ps[j].add(pTemp);
+        ps[j+1].add(pTemp);
+      }
+    }
+    for (int j=1; j<numOfpoints-1; j++) ps[j].div(2);
+    for (int j=0; j<numOfpoints; j++) ps[j].mult(nu);
+    
+    return ps;
+  }
+  
   // Trapezoid (Predictor-Corrector) Scheme
   void update(float dt, PVector p) {
     
@@ -329,6 +373,14 @@ class FlexibleSheet extends LineSegBody {
     }
     
   } // end of Trapezoid
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -460,49 +512,7 @@ class FlexibleSheet extends LineSegBody {
   
   
   
-  // calculate the pressure force at each point
-  PVector [] pressForcePoints ( Field p ) {
-    
-    int orthSize = orth.length;
-    PVector [] pf = new PVector[numOfpoints];
-    for (int i=0; i<numOfpoints; i++) pf[i] = new PVector(0, 0);
-    
-    for ( int s=-1; s<=1; s+=2 ) {
-      
-      for ( int j=0; j<orthSize; j++ ) {
-        float pdl = p.linear( cpoints[j].position.x+0.5*s*thk*orth[j].nx, cpoints[j].position.y+0.5*s*thk*orth[j].ny )*orth[j].l;
-        PVector pTemp = new PVector(s*pdl*orth[j].nx, s*pdl*orth[j].ny);
-        pf[j].sub(pTemp);
-        pf[j+1].sub(pTemp);
-      }
-    }
-    for (int j=1; j<numOfpoints-1; j++) pf[j].div(2);
-    
-    return pf;
-  }
   
-  // calculate the pressure force at each point
-  PVector [] stressForcePoints ( VectorField Vel, float nu ) {
-    
-    Field omega = Vel.curl();
-    
-    int orthSize = orth.length;
-    PVector [] ps = new PVector[numOfpoints];
-    for (int i=0; i<numOfpoints; i++) ps[i] = new PVector(0, 0);
-    
-    for ( int s=-1; s<=1; s+=2 ) {
-      for ( int j=0; j<orthSize; j++ ) {
-        float omegaZVal = omega.linear( cpoints[j].position.x+0.5*s*thk*orth[j].nx, cpoints[j].position.y+0.5*s*thk*orth[j].ny );
-        PVector pTemp = new PVector(s*omegaZVal*orth[j].ny, s*omegaZVal*orth[j].nx);
-        ps[j].add(pTemp);
-        ps[j+1].add(pTemp);
-      }
-    }
-    for (int j=1; j<numOfpoints-1; j++) ps[j].div(2);
-    for (int j=0; j<numOfpoints; j++) ps[j].mult(nu);
-    
-    return ps;
-  }
   
   
   
@@ -814,10 +824,5 @@ class FlexibleSheet extends LineSegBody {
   } // end of Trapezoid
   
   // *************************************************************** //
-    
-  void mydisplay() {
-    for (ControlPoint cp : cpoints) cp.display();
-  }
-  
   
 } //=========== end of FlexibleSheet class ===============
