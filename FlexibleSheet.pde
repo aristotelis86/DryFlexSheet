@@ -304,7 +304,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.update( dt );
     }
-    
+    getOrth();
+    getBox();
   } // end of update (prediction)
   
   void update2(float dt, PVector p) {
@@ -323,6 +324,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.update2( dt );
     }
+    getOrth();
+    getBox();
   } // end of Trapezoid
   
   // Alternative Update based on Predictor-Corrector Scheme (gravity only)
@@ -342,6 +345,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.updateAlt( dt );
     }
+    getOrth();
+    getBox();
   } // end of update (prediction)
   
   void updateAlt2(float dt, PVector p) {
@@ -360,6 +365,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.updateAlt2( dt );
     }
+    getOrth();
+    getBox();
   } // end of Trapezoid
   
   
@@ -390,6 +397,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.update( dt );
     }
+    getOrth();
+    getBox();
   } // end of update (prediction)
   
   void update2( float dt, BDIM flow ) { update2( dt, flow, new PVector(0,0)); }
@@ -418,6 +427,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.update2( dt );
     }
+    getOrth();
+    getBox();
   } // end of Trapezoid
   
   // Alternative Update based on Predictor-Corrector Scheme (gravity only)
@@ -447,6 +458,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.updateAlt( dt );
     }
+    getOrth();
+    getBox();
   } // end of update (prediction)
   
   void updateAlt2( float dt, BDIM flow ) { updateAlt2( dt, flow, new PVector(0,0)); }
@@ -475,6 +488,8 @@ class FlexibleSheet extends LineSegBody {
     for (ControlPoint cp : cpoints) {
       if (!cp.fixed) cp.updateAlt2( dt );
     }
+    getOrth();
+    getBox();
   } // end of Trapezoid
   
   
