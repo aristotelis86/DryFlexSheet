@@ -4,7 +4,7 @@ int ny = (int)pow(2,6); // y-dir resolution
 
 float L = ny/4.;
 float thick = 1;
-float M = 2;
+float M = 0.5;
 int resol = 1;
 float stiffness = 100;
 float xpos = nx/2.;
@@ -17,7 +17,7 @@ PVector gravity = new PVector(0,10);
 float t = 0; // time keeping
 float dt; // time step size
 
-boolean saveVidFlag = false;
+boolean saveVidFlag = true;
 //============================ END of INPUTS Section ============================//
 
 //***************************** Setup Section *****************************//
