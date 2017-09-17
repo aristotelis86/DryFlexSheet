@@ -179,10 +179,25 @@ class WriteInfo {
   }
   void saveInfoCPoints( float t ) { saveInfoCPoints( t, 0 ); }
   void saveInfoCPoints() { saveInfoCPoints( 0, 0 ); }
+  
+  void saveInfoCPointsSheet( float t, int d ) {
+    outputPos[d].println("============= t = "+t+" ================");
+    outputVel[d].println("============= t = "+t+" ================");
+    outputForce[d].println("============= t = "+t+" ================");
+
+    for (int i=0; i<myCPoints[d].size(); i++) {
+      ControlPoint cp = myCPoints[d].get(i);
+      outputPos[d].println(cp.position.x + " " + cp.position.y);
+      outputVel[d].println(cp.velocity.x + " " + cp.velocity.y);
+      outputForce[d].println(cp.force.x + " " + cp.force.y);
+    }
+  }
+  void saveInfoCPointsSheet( float t ) { saveInfoCPoints( t, 0 ); }
+  void saveInfoCPointsSheet() { saveInfoCPoints( 0, 0 ); }
 
   void saveInfoSheet( float t, PVector g, float b, int d ) {
     float gMag = g.mag();
-    saveInfoCPoints( t, d );
+    saveInfoCPointsSheet( t, d );
     float EE = 0;
 
     outputEnergy[d].println("============= t = "+t+" ================");
