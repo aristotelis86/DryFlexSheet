@@ -287,21 +287,24 @@ class ControlPoint {
     }
   }
   void FastCPointCPointCollision( ControlPoint other ) {
-    float dtx, dty;
+    float t1, t2, D, Dt1, Dt2;
     float tol = 1e-7;
     
-    dtx = (this.position.x+other.positionOld.x-this.positionOld.x-other.position.x)/(other.positionOld.x-this.positionOld.x);
-    dty = (this.position.y+other.positionOld.y-this.positionOld.y-other.position.y)/(other.positionOld.y-this.positionOld.y);
+    D = (this.positionOld.x - this.position.x)*(other.position.y - other.positionOld.y) - (other.position.x - other.positionOld.x)*(this.positionOld.y - this.position.y);
+    Dt1 = (this.positionOld.x - other.positionOld.x)*(other.position.y - other.positionOld.y) - (other.position.x - other.positionOld.x)*(this.positionOld.y - other.positionOld.y);
+    Dt2 = (this.positionOld.x - this.position.x)*(this.positionOld.y - other.positionOld.y) - (this.positionOld.x - other.positionOld.x)*(this.positionOld.y - this.position.y);
     
-    if (abs(dtx-dty)<tol) {
-      if ((dtx>0) && (dtx<1)) {
-        println("dtx="+dtx);
-        println("dty="+dty);
-        println("diff="+abs(dtx-dty));
-        this.impDisplay();
-        other.impDisplay();
-        noLoop();
+    if (abs(D) > tol) {
+      t1 = Dt1/D;
+      t2 = Dt2/D;
+      if ((t1>0) && (t2>0)) {
+        if ((t1<1) && (t2<1)) {
+          this.impDisplay();
+          other.impDisplay();
+          noLoop();
+        }
       }
     }
   }
+  
 } // end of ControlPoint class
