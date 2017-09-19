@@ -116,7 +116,8 @@ class FlexibleSheet extends LineSegBody {
   // Determine the size of the time step
   float Determine_time_step() {
     float ReLam, ImLam, dt;
-    float n = float(numOfpoints);
+    float n = float(numOfsprings);
+    //float n = float(numOfpoints);
     
     float RootDet = 1-stiffness*pointMass*sq(Length)/(2*sq(damping)*sq(n));
     float fact = 4*damping*sq(n)/(pointMass*sq(Length));
@@ -130,7 +131,8 @@ class FlexibleSheet extends LineSegBody {
       ImLam = 0.0;
     }
     
-    dt = -1*ReLam/(sq(ReLam)+sq(ImLam));
+    //dt = -1*ReLam/(sq(ReLam)+sq(ImLam));
+    dt = -1/(sq(ReLam)+sq(ImLam));
     return dt;
   } // end of Determine_time_step
   

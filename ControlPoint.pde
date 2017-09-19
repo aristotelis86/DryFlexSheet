@@ -283,7 +283,8 @@ class ControlPoint {
     if ( dd <= clearRad ) {
       this.impDisplay();
       other.impDisplay();
-      ResolveCPointCPoint( other, 1 );
+      //ResolveCPointCPoint( other, 1 );
+      delay(1000);
     }
   }
   void FastCPointCPointCollision( ControlPoint other ) {
@@ -316,20 +317,164 @@ class ControlPoint {
         if ((tcol>=0) && (tcol<=1)) {
           this.impDisplay();
           other.impDisplay();
-          ResolveCPointCPoint( other, tcol );
+          //ResolveCPointCPoint( other, tcol );
+          delay(1000);
         }
       }
     }
   }
   
-  void PointEdgeCollision( Spring sp ) {
+  void CPointSpringCollision( Spring sp ) {
+    float tol = 1e-7;
+    float CSDist = -1;
     ControlPoint p1, p2;
     p1 = sp.p1;
     p2 = sp.p2;
     
+    float clearRad = p1.thick/2 + this.thick/2; 
     
+    PVector n = PVector.sub(p2.position, p1.position);
+    PVector cp1 = PVector.sub(p1.position, this.position);
     
+    float dotProdncp1 = PVector.dot(n,cp1);
     
+    // Closest point is a
+    if ( dotProdncp1 > tol ) CSDist = PVector.dot(cp1,cp1);
+    else {
+      
+      PVector cp2 = PVector.sub(this.position, p2.position);
+      float dotProdncp2 = PVector.dot(n,cp2);
+    
+      // Closest point is b
+      if ( dotProdncp2 > tol ) CSDist = PVector.dot(cp2,cp2);
+      else {
+        // Closest point is between a and b
+        PVector epsilon;
+        float denom = PVector.dot(n,n);
+        n.mult(dotProdncp1/denom);
+        epsilon = PVector.sub(cp1,n);
+        CSDist = PVector.dot(epsilon,epsilon);
+      }
+    }
+    
+    if (CSDist >= 0) {
+      if (sqrt(CSDist)<=clearRad) {
+        p1.impDisplay();
+        p2.impDisplay();
+        this.impDisplay();
+        delay(1000);
+      }
+    }
+  }
+  
+  
+  void LineSweepsPoint ( Spring sp ) {
+    ControlPoint p1, p2;
+    p1 = sp.p1;
+    p2 = sp.p2;
+    float [] tt = new float[2];
+    float ss;
+    PVector p1Old = p1.positionOld.copy();
+    PVector p1New = p1.position.copy();
+    PVector p2Old = p2.positionOld.copy();
+    PVector p2New = p2.position.copy();
+    PVector mineOld = this.positionOld.copy();
+    PVector mineNew = this.position.copy();
+    
+    p1Old.sub(mineOld);
+    p1New.sub(mineNew);
+    p2Old.sub(mineOld);
+    p2New.sub(mineNew);
+    
+    PVector a = PVector.sub(new PVector(0,0), p1Old);
+    PVector b = PVector.mult(PVector.sub(p1New,p1Old),-1);
+    PVector c = PVector.sub(p2Old,p1Old);
+    PVector d = PVector.sub(PVector.sub(p2New,p2Old),PVector.sub(p1New,p1Old));
+    
+    PVector coef2 = b.cross(d);
+    PVector coef1 = PVector.add(a.cross(d),b.cross(c));
+    PVector coef0 = a.cross(c);
+    
+    tt = QuadraticRoots( coef2.z, coef1.z, coef0.z );
+    
+    if (tt[0]>tt[1]) {
+      float temp = tt[0];
+      tt[0] = tt[1];
+      tt[1] = temp;
+    }
+    
+    for (int j=0; j<2 ; j++) {
+      if ((tt[j]<0) || (tt[j]>1)) {
+        continue;
+      }
+      else {
+        PVector p1Proj = LInterp( p1Old.copy(), p1New.copy(), tt[j]);
+        PVector p2Proj = LInterp( p2Old.copy(), p2New.copy(), tt[j]);
+        ss = PointProject2Line( p1Proj, p2Proj );
+        if ((ss<0) || (ss>1)) {
+          continue;
+        }
+        else {
+          p1.impDisplay();
+          p2.impDisplay();
+          this.impDisplay();
+          println(tt[j]);
+          println(ss);
+          delay(2000);
+          break;
+        }
+      }
+    }
+  }
+  
+  PVector LInterp( PVector start, PVector end, float dt ) {
+    PVector out;
+    
+    PVector delta = PVector.sub(end, start);
+    delta.mult(dt);
+    out = PVector.add(start,delta);
+    
+    return out;
+  }
+  
+  float PointProject2Line( PVector start, PVector end ) {
+    float s;
+    PVector b = PVector.sub(new PVector(0,0), start);
+    PVector d = PVector.sub(end, start);
+    
+    float numer = PVector.dot(b,d);
+    float denom = PVector.dot(d,d);
+    
+    s = numer/denom;
+    return s;
+  }
+  
+  float [] QuadraticRoots( float a2, float a1, float a0 ) {
+    float [] t = new float[2];
+    
+    float dd = sq(a1) - 4*a2*a0;
+    
+    if (a2==0) {
+      if (a1==0) {
+        t[0] = -999;
+        t[1] = -999;
+      }
+      else {
+        t[0] = -a0/a1;
+        t[1] = t[0];
+      }
+    }
+    else {
+      if (dd<0) {
+        t[0] = -a1/(2*a2);
+        t[1] = t[0];
+      }
+      else {
+        t[0] = (-a1-sqrt(dd))/(2*a2);
+        t[1] = (-a1+sqrt(dd))/(2*a2);
+      }
+    }
+    return t;
   }
   
   
