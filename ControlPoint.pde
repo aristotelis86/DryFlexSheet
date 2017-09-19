@@ -283,28 +283,85 @@ class ControlPoint {
     if ( dd <= clearRad ) {
       this.impDisplay();
       other.impDisplay();
-      noLoop();
+      ResolveCPointCPoint( other, 1 );
     }
   }
   void FastCPointCPointCollision( ControlPoint other ) {
-    float t1, t2, D, Dt1, Dt2;
-    float tol = 1e-7;
+    float tol = 1e-6;
+    float tcol, denom, Rt;
     
-    D = (this.positionOld.x - this.position.x)*(other.position.y - other.positionOld.y) - (other.position.x - other.positionOld.x)*(this.positionOld.y - this.position.y);
-    Dt1 = (this.positionOld.x - other.positionOld.x)*(other.position.y - other.positionOld.y) - (other.position.x - other.positionOld.x)*(this.positionOld.y - other.positionOld.y);
-    Dt2 = (this.positionOld.x - this.position.x)*(this.positionOld.y - other.positionOld.y) - (this.positionOld.x - other.positionOld.x)*(this.positionOld.y - this.position.y);
+    float vxmine, vymine, vxother, vyother;
+    float xoldmine, yoldmine, xoldother, yoldother;
     
-    if (abs(D) > tol) {
-      t1 = Dt1/D;
-      t2 = Dt2/D;
-      if ((t1>0) && (t2>0)) {
-        if ((t1<1) && (t2<1)) {
+    float clearRad = (thick/2) + (other.thick/2);
+    
+    vxmine = position.x-positionOld.x;
+    vymine = position.y-positionOld.y;
+    vxother = other.position.x-other.positionOld.x;
+    vyother = other.position.y-other.positionOld.y;
+    
+    xoldmine = positionOld.x; yoldmine = positionOld.y;
+    xoldother = other.positionOld.x; yoldother = other.positionOld.y;
+    
+    denom = sq(vxmine-vxother)+sq(vymine-vyother);
+    if (denom<tol) {
+      CPointCPointCollision( other );
+    }
+    else {
+      tcol = -1*((vxmine-vxother)*(xoldmine-xoldother)+(vymine-vyother)*(yoldmine-yoldother))/denom;
+      
+      Rt = sq((xoldmine+tcol*vxmine) - (xoldother + tcol*vxother)) + sq((yoldmine+tcol*vymine) - (yoldother + tcol*vyother));
+      
+      if (Rt<sq(clearRad)) {
+        if ((tcol>=0) && (tcol<=1)) {
           this.impDisplay();
           other.impDisplay();
-          noLoop();
+          ResolveCPointCPoint( other, tcol );
         }
       }
     }
   }
   
+  void PointEdgeCollision( Spring sp ) {
+    ControlPoint p1, p2;
+    p1 = sp.p1;
+    p2 = sp.p2;
+    
+    
+    
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void ResolveCPointCPoint ( ControlPoint other, float tt ) {
+    float xnewmine, ynewmine, xnewother, ynewother;
+    
+    xnewmine = positionOld.x + .9*tt*(position.x - positionOld.x);
+    ynewmine = positionOld.y + .9*tt*(position.y - positionOld.y);
+    xnewother = other.positionOld.x + .9*tt*(other.position.x - other.positionOld.x);
+    ynewother = other.positionOld.y + .9*tt*(other.position.y - other.positionOld.y);
+    
+    
+    float Vxi = (this.velocity.x*(this.mass-other.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*other.velocity.x;
+    float Vyi = (this.velocity.y*(this.mass-other.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*other.velocity.y;
+    float Vxj = (other.velocity.x*(other.mass-this.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*this.velocity.x;
+    float Vyj = (other.velocity.y*(other.mass-this.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*this.velocity.y;
+    xnewmine = xnewmine + (1-.9*tt)*Vxi;
+    ynewmine = ynewmine + (1-.9*tt)*Vyi;
+    xnewother = xnewother + (1-.9*tt)*Vxj;
+    ynewother = ynewother + (1-.9*tt)*Vyj;
+    this.UpdatePosition( xnewmine, ynewmine );
+    other.UpdatePosition( xnewother, ynewother );
+    this.UpdateVelocity( 0.9*Vxi, 0.9*Vyi );
+    other.UpdateVelocity( 0.9*Vxj, 0.9*Vyj );
+  }
+
 } // end of ControlPoint class
