@@ -281,10 +281,8 @@ class ControlPoint {
     float clearRad = (this.thick + other.thick)*.25;
     
     if ( dd <= clearRad ) {
-      this.impDisplay();
-      other.impDisplay();
-      //ResolveCPointCPoint( other, 1 );
-      delay(1000);
+      println("simple cpoint-cpoint collision");
+      ResolveCPointCPoint( other, 1 );
     }
   }
   void FastCPointCPointCollision( ControlPoint other ) {
@@ -315,10 +313,8 @@ class ControlPoint {
       
       if (Rt<sq(clearRad)) {
         if ((tcol>=0) && (tcol<=1)) {
-          this.impDisplay();
-          other.impDisplay();
-          //ResolveCPointCPoint( other, tcol );
-          delay(1000);
+          println("fast cpoint-cpoint collision");
+          ResolveCPointCPoint( other, tcol );          
         }
       }
     }
@@ -359,10 +355,15 @@ class ControlPoint {
     
     if (CSDist >= 0) {
       if (sqrt(CSDist)<=clearRad) {
+        println("clearance="+clearRad);
+        println("currDist="+sqrt(CSDist));
+        println("p1="+p1.position.x+" "+p1.position.y);
+        println("p2="+p2.position.x+" "+p2.position.y);
+        println("this="+this.position.x+" "+this.position.y);
         p1.impDisplay();
         p2.impDisplay();
         this.impDisplay();
-        delay(1000);
+        noLoop();
       }
     }
   }
@@ -415,12 +416,16 @@ class ControlPoint {
           continue;
         }
         else {
-          p1.impDisplay();
-          p2.impDisplay();
-          this.impDisplay();
-          println(tt[j]);
-          println(ss);
-          delay(2000);
+          //println("p1="+p1.position.x+" "+p1.position.y);
+          //println("p2="+p2.position.x+" "+p2.position.y);
+          //println("this="+this.position.x+" "+this.position.y);
+          //p1.impDisplay();
+          //p2.impDisplay();
+          //this.impDisplay();
+          //println(tt[j]);
+          //println(ss);
+          ResolveCPointSpring( sp, tt[j] );
+          //noLoop();
           break;
         }
       }
@@ -489,24 +494,58 @@ class ControlPoint {
   void ResolveCPointCPoint ( ControlPoint other, float tt ) {
     float xnewmine, ynewmine, xnewother, ynewother;
     
-    xnewmine = positionOld.x + .9*tt*(position.x - positionOld.x);
-    ynewmine = positionOld.y + .9*tt*(position.y - positionOld.y);
-    xnewother = other.positionOld.x + .9*tt*(other.position.x - other.positionOld.x);
-    ynewother = other.positionOld.y + .9*tt*(other.position.y - other.positionOld.y);
+    xnewmine = positionOld.x + .5*tt*(position.x - positionOld.x);
+    ynewmine = positionOld.y + .5*tt*(position.y - positionOld.y);
+    xnewother = other.positionOld.x + .5*tt*(other.position.x - other.positionOld.x);
+    ynewother = other.positionOld.y + .5*tt*(other.position.y - other.positionOld.y);
     
     
     float Vxi = (this.velocity.x*(this.mass-other.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*other.velocity.x;
     float Vyi = (this.velocity.y*(this.mass-other.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*other.velocity.y;
     float Vxj = (other.velocity.x*(other.mass-this.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*this.velocity.x;
     float Vyj = (other.velocity.y*(other.mass-this.mass)/(this.mass+other.mass)) + (2*other.mass/(this.mass+other.mass))*this.velocity.y;
-    xnewmine = xnewmine + (1-.9*tt)*Vxi;
-    ynewmine = ynewmine + (1-.9*tt)*Vyi;
-    xnewother = xnewother + (1-.9*tt)*Vxj;
-    ynewother = ynewother + (1-.9*tt)*Vyj;
+    //xnewmine = xnewmine + (1-.6*tt)*Vxi;
+    //ynewmine = ynewmine + (1-.6*tt)*Vyi;
+    //xnewother = xnewother + (1-.6*tt)*Vxj;
+    //ynewother = ynewother + (1-.6*tt)*Vyj;
     this.UpdatePosition( xnewmine, ynewmine );
     other.UpdatePosition( xnewother, ynewother );
-    this.UpdateVelocity( 0.9*Vxi, 0.9*Vyi );
-    other.UpdateVelocity( 0.9*Vxj, 0.9*Vyj );
+    this.UpdateVelocity( Vxi, Vyi );
+    other.UpdateVelocity( Vxj, Vyj );
+  }
+  
+  void ResolveCPointSpring ( Spring spring, float tt ) {
+    float xnewmine, ynewmine, xnewother1, ynewother1, xnewother2, ynewother2;
+    ControlPoint other1 = spring.p1;
+    ControlPoint other2 = spring.p2;
+    
+    xnewmine = positionOld.x + .5*tt*(position.x - positionOld.x);
+    ynewmine = positionOld.y + .5*tt*(position.y - positionOld.y);
+    
+    xnewother1 = other1.positionOld.x + .5*tt*(other1.position.x - other1.positionOld.x);
+    ynewother1 = other1.positionOld.y + .5*tt*(other1.position.y - other1.positionOld.y);
+    xnewother2 = other2.positionOld.x + .5*tt*(other2.position.x - other2.positionOld.x);
+    ynewother2 = other2.positionOld.y + .5*tt*(other2.position.y - other2.positionOld.y);
+    
+    float otherVelx = 0.5*(other1.velocity.x + other2.velocity.x);
+    float otherVely = 0.5*(other1.velocity.y + other2.velocity.y);
+    float otherMass = other1.mass + other2.mass;
+    
+    
+    float Vxi = (this.velocity.x*(this.mass-otherMass)/(this.mass+otherMass)) + (2*otherMass/(this.mass+otherMass))*otherVelx;
+    float Vyi = (this.velocity.y*(this.mass-otherMass)/(this.mass+otherMass)) + (2*otherMass/(this.mass+otherMass))*otherVely;
+    float Vxj = (otherVelx*(otherMass-this.mass)/(this.mass+otherMass)) + (2*otherMass/(this.mass+otherMass))*this.velocity.x;
+    float Vyj = (otherVely*(otherMass-this.mass)/(this.mass+otherMass)) + (2*otherMass/(this.mass+otherMass))*this.velocity.y;
+    //xnewmine = xnewmine + (1-.6*tt)*Vxi;
+    //ynewmine = ynewmine + (1-.6*tt)*Vyi;
+    //xnewother = xnewother + (1-.6*tt)*Vxj;
+    //ynewother = ynewother + (1-.6*tt)*Vyj;
+    this.UpdatePosition( xnewmine, ynewmine );
+    other1.UpdatePosition( xnewother1, ynewother1 );
+    other2.UpdatePosition( xnewother2, ynewother2 );
+    this.UpdateVelocity( Vxi, Vyi );
+    other1.UpdateVelocity( Vxj, Vyj );
+    other2.UpdateVelocity( Vxj, Vyj );
   }
 
 } // end of ControlPoint class
