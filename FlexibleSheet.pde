@@ -109,7 +109,7 @@ class FlexibleSheet extends LineSegBody {
   
   // Calculate damping coefficient for numerical purposes
   float Determine_damping() {
-    float d = sqrt(stiffness*pointMass);
+    float d = 2*sqrt(stiffness*pointMass);
     return d;
   }
   
@@ -131,8 +131,8 @@ class FlexibleSheet extends LineSegBody {
       ImLam = 0.0;
     }
     
-    //dt = -1*ReLam/(sq(ReLam)+sq(ImLam));
-    dt = -1/(sq(ReLam)+sq(ImLam));
+    dt = -1*ReLam/(sq(ReLam)+sq(ImLam));
+    //dt = -1/(sq(ReLam)+sq(ImLam));
     return dt;
   } // end of Determine_time_step
   
